@@ -5,31 +5,35 @@ function addText(myText)
 
 function test()
 {
-	addText("Test");
-	countCalls = 1;
-	secretMessage = "This is a secret message that needs to be signed";
-	s2 = "This is my very secret phrase";
-	publicKeyString = getPublicKey(s2);
+	//secretMessage = "Hello World!";
+	//s2 = "secretPhrase";
+	//secretMessage = "patriots";
+	//s2 = "three";
+	var secretMessage = "This is a secret message that needs to be signed";
+	var s2 = "This is my very secret phrase";
+	var signatureString;
+	var success;
+	var secretMsg = byteArray_to_hex_string(string_to_byteArray(secretMessage));
+	var secretPhrase = byteArray_to_hex_string(string_to_byteArray(s2));
+	var publicKey = getPublicKey(secretPhrase);
 	addText("message: " + secretMessage);
 	addText("secret phrase: " + s2);
-	addText("public key: " + publicKeyString);
-	var secretMsg = byteArray_to_hex_string(string_to_byteArray(secretMessage));
+	addText("public key: " + publicKey);
 
 	addText("Signing... ");
-	signatureString = sign(string_to_byteArray(secretMessage), s2);
-	addText("Signature: " + signatureString);
+	var signature = sign(secretMsg, secretPhrase);
+	addText("Signature: " + signature);
 	
 	addText("Verifying... ");
-	success = verify(signatureString, secretMsg, publicKeyString);
+	success = verify(signature, secretMsg, publicKey);
 	addText("verify returned: " + success);
 
-	countCalls = 0;
-	addText("Speed test");
-	var loop = 10;
+	var loop = 30;
+	var time1=0, time2=0;
 	var currentTimeMillisBegin = new Date().getTime();
 	for (u=0; u<loop; u++)
 	{
-		publicKeyString = getPublicKey(s2);
+		publicKey = getPublicKey(secretPhrase);
 	}
 	var currentTimeMillisEnd = new Date().getTime();
 	addText("Javascript needs " + ((currentTimeMillisEnd - currentTimeMillisBegin)/loop).toString() + "ms/getPublicKey");
@@ -37,19 +41,21 @@ function test()
 	var currentTimeMillisBegin = new Date().getTime();
 	for (u=0; u<loop; u++)
 	{
-		signature = sign(string_to_byteArray(secretMessage), s2);
+		signature = sign(secretMsg, secretPhrase);
 	}
 	var currentTimeMillisEnd = new Date().getTime();
-	addText("Javascript needs " + ((currentTimeMillisEnd - currentTimeMillisBegin)/loop).toString() + "ms/sign");
+	time1 = ((currentTimeMillisEnd - currentTimeMillisBegin)/loop);
+	addText("Javascript needs " + time1.toString() + "ms/sign");
 
 	currentTimeMillisBegin = new Date().getTime();
 	for (u=0; u<loop; u++)
 	{
-		success = verify(signatureString, secretMsg, publicKeyString);
+		success = verify(signature, secretMsg, publicKey);
 	}
 	currentTimeMillisEnd = new Date().getTime();
-	addText("Javascript needs " + ((currentTimeMillisEnd - currentTimeMillisBegin)/loop).toString() + "ms/verify");
-	addText("Finished");
+	time2 = ((currentTimeMillisEnd - currentTimeMillisBegin)/loop);
+	addText("Javascript needs " + time2.toString() + "ms/verify");
+	addText("sign + verify: " + (time1+time2).toString() + "ms");
 
 	return;
 }
