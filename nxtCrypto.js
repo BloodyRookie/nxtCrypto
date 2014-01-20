@@ -977,8 +977,8 @@ curve25519_verify = function(Y, v, h, P) {
 			
 			curve25519_dbl(yx[0], yz[0], t1[k], t2[k]);
 			k = (di >> j & 2) ^ ((di >> j & 1) << 1);
-			q = curve25519_sum(yx[1], yz[1], t1[1], t2[1], t1[k], t2[k], p[di >> j & 1]);
-			q = curve25519_sum(yx[2], yz[2], t1[2], t2[2], t1[0], t2[0], s[((vi ^ hi) >> j & 2) >> 1]);
+			curve25519_sum(yx[1], yz[1], t1[1], t2[1], t1[k], t2[k], p[di >> j & 1]);
+			curve25519_sum(yx[2], yz[2], t1[2], t2[2], t1[0], t2[0], s[((vi ^ hi) >> j & 2) >> 1]);
 		}
 	}
 
