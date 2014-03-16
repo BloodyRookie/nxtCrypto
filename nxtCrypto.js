@@ -872,16 +872,33 @@ curve25519_keygen = function(s, curve) {
 * returns true on success, false on failure (use different x or h)
 */
 curve25519_sign = function(v, h, x, s) {
-	tmp1=new Int8Array(65);
-	tmp2=new Int8Array(33);
+	var tmp1=new Int8Array(64);
+	var tmp2=new Int8Array(64);
+	var h1, x1;
 	for (i = 0; i < 32; i++)
 	{
 		v[i] = 0;
 	}
-	curve25519_mula_small(v, x, 0, h, 32, -1);
-	curve25519_mula_small(v, v, 0, curve25519_order, 32, parseInt((15-v[31])/16));
-	curve25519_mula32(tmp1, v, s, 32, 1);
-	curve25519_divmod(tmp2, tmp1, 64, curve25519_order, 32);
+    // Don't clobber the arguments, be nice!
+    h1 = curve25519_cpy32(h);
+    x1 = curve25519_cpy32(x);
+
+    // Reduce modulo group order
+    var tmp3=new Int8Array(32);
+    curve25519_divmod(tmp3, h1, 32, curve25519_order, 32);
+    curve25519_divmod(tmp3, x1, 32, curve25519_order, 32);
+
+    // v = x1 - h1
+    // If v is negative, add the group order to it to become positive.
+    // If v was already positive we don't have to worry about overflow
+    // when adding the order because v < ORDER and 2*ORDER < 2^256
+    curve25519_mula_small(v, x1, 0, h1, 32, -1);
+    curve25519_mula_small(v, v , 0, curve25519_order, 32, 1);
+
+    // tmp1 = (x-h)*s mod q
+    curve25519_mula32(tmp1, v, s, 32, 1);
+    curve25519_divmod(tmp2, tmp1, 64, curve25519_order, 32);
+
 	w=0;
 	for (k = 0; k < 32; k++)
 	{
